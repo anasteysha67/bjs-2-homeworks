@@ -1,44 +1,44 @@
 //задача 1
 function cachingDecoratorNew(func) {
   let cache = [];
+
     function wrapper(...args) {
       const hash = args.join(','); 
-      let objectInCache = cache.find((item) => item == hash); 
-      let result = cache[objectInCache];
-      if (!objectInCache) { 
-        cache.push(hash) ; 
-        cache[hash] = result = func.call(this, ...args);
+      let objectInCache = cache.find((item) => item.hash === hash); 
+      
+      if (objectInCache) { 
+        console.log("Из кэша: " + objectInCache.result); 
+        return "Из кэша: " + objectInCache.result; 
+      }
+
+      let result = func.call(this, ...args); 
+      cache.push({ hash, result });
         if (cache.length > 5) { 
-         cache.splice(0,1) 
+         cache.shift() 
         }
         console.log("Вычисляем: " + result);
         return "Вычисляем: " + result;   
-      } else {
-        console.log("Из кэша: " + result); 
-        return "Из кэша: " + result; 
-    }
-  }
+      }   
   return wrapper;
-  }
-
+}
+  
 //задача 2
-  function debounceDecoratorNew(func, ms) {
-    let timerId;
-    function wrapperSend(...args){
-      clearTimeout(timerId);
-      if(wrapperSend.history === undefined){
-          wrapperSend.history = [1];
-          setTimeout(() => {
-            return func.call()
-          },0) 
-      }
-      else {
-          timerId = setTimeout(() => {
-            return func.call()
-          },ms)
+  function debounceDecoratorNew(func) {
+    let timerID = null;
+    let repeatCall = false;
+  
+    function wrapper(...rest) {
+      clearTimeout(timerID);
+      timerID = setTimeout(() => {
+        repeatCall = false;
+        return func.call(...rest);
+      });
+      if (!repeatCall) {
+        repeatCall = true;
+        func.call(...rest);
       }
     }
-    return wrapperSend;
+    return wrapper;
   }
 
  //задача 3 
